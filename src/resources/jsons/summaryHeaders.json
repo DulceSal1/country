@@ -1,0 +1,32 @@
+[
+	{
+		"name": "TIPO",
+		"value": "boxoffice",
+		"footer": "TOTAL"
+	},
+	{
+		"name": "VENDIDOS",
+		"value": "sold",
+		"footer": "sum"
+	},
+	{
+		"name": "PROMOCIONES",
+		"value": "promos",
+		"footer": "sum"
+	},
+	{
+		"name": "CORTESÍAS",
+		"value": "courtesies",
+		"footer": "sum"
+	},
+	{
+		"name": "TOTAL",
+		"value": "quantity",
+		"footer": "sumtot"
+	},
+	{
+		"name": "MONTO",
+		"value": "value",
+		"footer": "sum"
+	}
+]
