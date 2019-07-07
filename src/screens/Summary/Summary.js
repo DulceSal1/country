@@ -6,6 +6,8 @@ import summaryData from '../../resources/jsons/summaryData.json';
 import { IconTable, IconChart } from '../../resources/svg/Icons';
 import produce from 'immer/dist/immer';
 import CurrencyFormat from 'react-currency-format';
+import SimpleBarChart from '../../components/Chart/SimpleBarChart';
+import StackedBarChart from '../../components/Chart/StackedBarChart';
 
 
 export default (class Summary extends React.PureComponent {
@@ -14,10 +16,29 @@ export default (class Summary extends React.PureComponent {
 			table: true,
 			chart: false
 		},
-		grandtot:0
+		grandtot:0,
+		data: []
 	};
 
-	componentDidMount() {}
+	componentDidMount() {
+		this.init();
+	}
+
+	init = () => {
+		let array = [];
+		summaryData.forEach((item, i) => {
+			const element = {
+				name: item.name,
+				online: item.summary[0].value,
+				boxoffice: item.summary[1].value
+			};
+			array = array.concat(element);
+		});
+		const nextState = produce(this.state, (draft) => {
+			draft.data = array;
+		});
+		this.setState(nextState);
+	};
 
 	onHandleIcon = (item) => {
 		const nextState = produce(this.state, (draft) => {
@@ -43,7 +64,7 @@ export default (class Summary extends React.PureComponent {
 	};
 
 	render() {
-		const { selected } = this.state;
+		const { selected,data } = this.state;
 		const headers = summaryHeaders;
 
 		return (
@@ -72,7 +93,12 @@ export default (class Summary extends React.PureComponent {
 						})}
 					</div>
 				)}
-				{selected.chart && <div className={styles.chart}>Gráfica</div>}
+				{selected.chart && (
+					<div className={styles.chart}>
+						<SimpleBarChart data={data} y1={'online'} y2={'boxoffice'} y1Axis={'left'} y2Axis={'left'} />
+						<StackedBarChart data={data} />
+					</div>
+				)}
 			</div>
 		);
 	}

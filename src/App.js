@@ -6,6 +6,7 @@ import Topbar from './components/Topbar/Topbar';
 import Boards1 from './screens/Boards/Boards1';
 import Report from './screens/Report/Report';
 import Summary from './screens/Summary/Summary';
+import Date from './screens/Date/Date';
 import Users from './screens/Users/Users';
 
 
@@ -20,6 +21,7 @@ export default withRouter(
 						<RouteWithTitle exact title="Tablas" path="/reporte" component={Report} />
 						<RouteWithTitle exact title="Tablas" path="/resumen" component={Summary} />
 						<RouteWithTitle exact title="Usuarios" path="/usuarios" component={Users} />
+						<RouteWithTitle exact title="Fechas" path="/fechas" component={Date} />
 						<Redirect to={'/inicio'} />
 					</Switch>
 				</div>
