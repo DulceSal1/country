@@ -1,76 +1,79 @@
 import * as React from 'react';
+import styles from './Summary.module.scss';
+import Table from '../../components/Table/Table';
 import summaryHeaders from '../../resources/jsons/summaryHeaders.json';
 import summaryData from '../../resources/jsons/summaryData.json';
-import styles from './Summary.module.scss';
+import { IconTable, IconChart } from '../../resources/svg/Icons';
+import produce from 'immer/dist/immer';
+import CurrencyFormat from 'react-currency-format';
 
-export default (class Home extends React.PureComponent {
-	state = {};
+
+export default (class Summary extends React.PureComponent {
+	state = {
+		selected: {
+			table: true,
+			chart: false
+		},
+		grandtot:0
+	};
 
 	componentDidMount() {}
 
-	calculateFooter = (data, item) => {
-		switch (item.footer) {
-			case 'sum':
-				return data.reduce((acc, row) => (acc += parseFloat(row[item.value])), 0);
-			case 'sumtot':
-				return data.reduce((acc, row) => (acc += parseFloat(row['sold']+row['promos']+row['courtesies'])), 0);
-			default:
-				return item.footer;
-		}
+	onHandleIcon = (item) => {
+		const nextState = produce(this.state, (draft) => {
+			draft.selected.table = false;
+			draft.selected.chart = false;
+			draft.selected[item] = true;
+		});
+		this.setState(nextState);
 	};
 
-    render() {
-		console.log(summaryHeaders);
-		console.log(summaryData);
-        const headers = summaryHeaders;
-        return(
-        summaryData.map((summ,i) => {
-            const data = summaryData[i].summary;
-            return (    
-                <div className={styles.main}>       
-                <div className={styles.tablediv}>
-                {summaryData[i].date} - {summaryData[i].name}
-                <table key={i} className={styles.table}>
-					<thead className={styles.mainHeader}>
-						<tr className={styles.header}>
-							{headers.map((header, i) => {
-								return (
-									<th key={i} className={styles.header_item}>
-										{header.name}
-									</th>
-								);
-							})}
-						</tr>
-					</thead>
-                    <tbody className={styles.body}>
-						{data.map((item, i) => {
+	onGrandTot = (summaryData) => {	
+		let sum=0;	
+		summaryData.forEach((data) => {			
+			data.summary.forEach((values) => {
+				sum = sum + values.value;
+			})
+		})
+		const nextState = produce(this.state, (draft) => {
+			draft.grandtot=sum;
+		});
+		this.setState(nextState);	
+		return  <CurrencyFormat value={this.state.grandtot} displayType={'text'} thousandSeparator={true} prefix={'$'} decimalScale={2} fixedDecimalScale={true} />;
+	};
+
+	render() {
+		const { selected } = this.state;
+		const headers = summaryHeaders;
+
+		return (
+			<div className={styles.main}>
+				<h3>Gran Total: { this.onGrandTot(summaryData)}</h3>
+				<div className={styles.icons}>
+					<div className={styles.container_icon} onClick={() => this.onHandleIcon('table')}>
+						<IconTable className={selected.table ? styles.icon_selected : styles.icon} />
+					</div>
+					<div className={styles.container_icon} onClick={() => this.onHandleIcon('chart')}>
+						<IconChart className={selected.chart ? styles.icon_selected : styles.icon} />
+					</div>
+				</div>
+				{selected.table && (
+					<div className={styles.table}>
+						{summaryData.map((data, i) => {
+							data.summary.forEach((item, i) => {
+								item.total = item.sold + item.courtesies + item.promos;
+							});
 							return (
-								<tr key={i} className={styles.row}>
-									{headers.map((header, i) => {
-										if(header.value==="quantity")
-										{ 
-											const subtot=item['sold']+item['promos']+item['courtesies'];
-											return <td className={styles.row_item}>{subtot}</td>;	}
-										else
-										{  return <td className={styles.row_item}>{item[header.value]}</td>; }
-										
-									})}
-								</tr>
+								<div key={i}>
+									<p className={styles.title}>{data.name}</p>
+									<Table data={data.summary} headers={headers} />
+								</div>
 							);
 						})}
-					</tbody>
-					<tfoot className={styles.footer}>
-						<tr className={styles.footer_row}>
-							{headers.map((header, i) => {
-								return <td key={i} className={styles.footer_item}>{this.calculateFooter(data, header)}</td>;
-							})}
-						</tr>
-					</tfoot>
-                </table>
-                </div>
-                </div>
-            );
-        })
-        );
+					</div>
+				)}
+				{selected.chart && <div className={styles.chart}>Gráfica</div>}
+			</div>
+		);
 	}
 });

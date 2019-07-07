@@ -1,12 +1,20 @@
 import * as React from 'react';
-import cashoutHeader from '../../resources/jsons/cashoutHeader.json';
-import cashoutData from '../../resources/jsons/cashoutData.json';
-import styles from './Tables.module.scss';
+import styles from './Table.module.scss';
+import CurrencyFormat from 'react-currency-format';
 
-export default (class Home extends React.PureComponent {
-	state = {};
-
-	componentDidMount() {}
+export default (class Table extends React.PureComponent {
+	formatData = (data, type) => {
+		switch (type) {
+			case 'text':
+				return data;
+			case 'number':
+				return data.toLocaleString(navigator.language, { minimumFractionDigits: 0 });
+			case 'money':
+				return <CurrencyFormat value={data} displayType={'text'} thousandSeparator={true} prefix={'$'} decimalScale={2} fixedDecimalScale={true} />;
+			default:
+				return data;
+		}
+	};
 
 	calculateFooter = (data, item) => {
 		switch (item.footer) {
@@ -18,11 +26,7 @@ export default (class Home extends React.PureComponent {
 	};
 
 	render() {
-		console.log(cashoutHeader);
-		console.log(cashoutData);
-		const headers = cashoutHeader;
-		const data = cashoutData[0].cashout;
-		console.log('TCL: Tables -> render -> data', data);
+		const { headers, data } = this.props;
 		return (
 			<div className={styles.main}>
 				<table className={styles.table}>
@@ -42,7 +46,11 @@ export default (class Home extends React.PureComponent {
 							return (
 								<tr key={i} className={styles.row}>
 									{headers.map((header, i) => {
-										return <td className={styles.row_item}>{item[header.value]}</td>;
+										return (
+											<td key={i} className={styles.row_item}>
+												{this.formatData(item[header.value], header.type)}
+											</td>
+										);
 									})}
 								</tr>
 							);
@@ -51,7 +59,11 @@ export default (class Home extends React.PureComponent {
 					<tfoot className={styles.footer}>
 						<tr className={styles.footer_row}>
 							{headers.map((header, i) => {
-								return <td className={styles.footer_item}>{this.calculateFooter(data, header)}</td>;
+								return (
+									<td key={i} className={styles.footer_item}>
+										{this.formatData(this.calculateFooter(data, header), header.type)}
+									</td>
+								);
 							})}
 						</tr>
 					</tfoot>

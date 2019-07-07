@@ -26,3 +26,21 @@ export const IconRemoveMark = (props) => {
 		</svg>
 	);
 };
+
+export const IconTable = (props) => {
+	const { className } = props;
+	return (
+		<svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+			<path d="M24 6h-24v-4h24v4zm0 4h-24v4h24v-4zm0 8h-24v4h24v-4z" />
+		</svg>
+	);
+};
+
+export const IconChart = (props) => {
+	const { className } = props;
+	return (
+		<svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+			<path d="M5 19h-4v-4h4v4zm6 0h-4v-8h4v8zm6 0h-4v-13h4v13zm6 0h-4v-19h4v19zm1 2h-24v2h24v-2z" />
+		</svg>
+	);
+};
