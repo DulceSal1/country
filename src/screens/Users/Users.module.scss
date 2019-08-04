@@ -1,0 +1,17 @@
+* {
+	box-sizing: border-box;
+}
+.country {
+	color: black;
+}
+.country:hover {
+	color: blue;
+	cursor: pointer;
+	outline: none;
+}
+
+.container_boards {
+	display: flex;
+	width: 900px;
+	background-color: darkslategrey;
+}
