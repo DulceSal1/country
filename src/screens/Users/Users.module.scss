@@ -12,6 +12,31 @@
 
 .container_boards {
 	display: flex;
-	width: 900px;
-	background-color: darkslategrey;
+	width: 500px;
+	background-color: lightcyan;
+}
+
+.main {
+	display: flex;
+	flex-direction: row;
+}
+.data {
+	flex: 1;
+}
+.container_button {
+	flex: 0.2;
+	padding: 8px;
+}
+.button {
+	cursor: pointer;
+	outline: none;
+}
+
+.city {
+	color: black;
+}
+.city:hover {
+	color: blue;
+	cursor: pointer;
+	outline: none;
 }

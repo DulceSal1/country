@@ -4,56 +4,107 @@ import WebServices from '../../WebServices/WebServices';
 import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 import produce from 'immer/dist/immer';
+import Table from '../../components/Table/Table';
+import SimpleBarChart from '../../components/Chart/SimpleBarChart';
+const ref = React.createRef();
+
 
 export default (class Users extends React.PureComponent {
 	state = {
 		response: {},
-		countries: [ 'mexico', 'canada', 'usa', 'india', 'china' ],
-		input_search:'https://restcountries.eu/rest/v2/name/'
+		input_search:'',
+		datos:[],
+		header:[{"name": "name","value": "name"},{"name": "temp","value": "temp"},{"name": "pressure","value": "pressure"},{"name": "humidity","value": "humidity"}]
 	};
 
 	componentDidMount() {
-		this.fetchData('mexico');
+		this.init();
+		this.fetchDataURL1('api.openweathermap.org/data/2.5/weather?q=London');
 	}
 
-	fetchData = async (country) => {
-		try {
-			const response = await WebServices.getCountryDetails({
-				country: country
-			});
-			// const nextState = produce(this.state, (draft) => {
-			// 	draft.response = response;
-			// });
-			// this.setState(nextState);
-			this.setState({ response: response[0] });
-
-			console.log('TCL: fetchData -> response', response);
-		} catch (e) {}
+	init = () => {
+		let array = [];
+		this.state.datos.forEach((item, i) => {
+			const element = {
+				name:item.name,
+				temp: item.temp,
+				humidity: item.humidity,
+				pressure: item.pressure
+			};
+			array = array.concat(element);
+		});
+		const nextState = produce(this.state, (draft) => {
+			draft.datos = array;
+		});
+		this.setState(nextState);
 	};
 
-	fetchDataURL = async (newURL) => {
+	fetchDataURL1 = async (newURL) => {
 		try {
-			const response = await WebServices.getCountryURL({
+			const nextState = produce(this.state, (draft) => {
+				draft.loading = true;
+			});
+			this.setState(nextState);
+			const response = await WebServices.getCountryURL1({
 				newURL: newURL
 			});
-			// const nextState = produce(this.state, (draft) => {
-			// 	draft.response = response;
-			// });
-			// this.setState(nextState);
-			this.setState({ response: response[0] });
-
-			console.log('TCL: fetchDataURL -> response', response);
+			const nextState2 = produce(this.state, (draft) => {
+				draft.response = response;
+				draft.loading = false;
+			});
+			this.setState(nextState2);
+			console.log('TCL: getCityWeaether -> response', response);
 		} catch (e) {}
 	};
 
-	showData = (country) => {
-		console.log('TCL: showData -> country', country);
-		this.fetchData(country);
+	showDataURL1 = (newURL) => {
+		console.log('TCL: showDataURL -> URL', newURL);
+		this.fetchDataURL1(newURL);
 	};
 
-	showDataURL = (newURL) => {
+	getCityWeaether = async (cityId) => {
+		try {
+			const nextState = produce(this.state, (draft) => {
+				draft.loading = true;
+			});
+			this.setState(nextState);
+			const response = await WebServices.getWeatherByCityId({
+				cityId: cityId
+			});
+			const nextState2 = produce(this.state, (draft) => {
+				draft.response = response;
+				draft.loading = false;
+			});
+			this.setState(nextState2);
+			console.log('TCL: getCityWeaether -> response', response);
+		} catch (e) {}
+	};
+
+	showWeaether = (cityId) => {
+		console.log('TCL: showWeaether -> cityId', cityId);
+		this.getCityWeaether(cityId);
+	};
+
+	fetchDataURL3 = async (newURL) => {
+		try {
+			const nextState = produce(this.state, (draft) => {
+				draft.loading = true;
+			});
+			this.setState(nextState);
+			const response = await WebServices.getCountryURL3({
+				newURL: newURL
+			});
+			const nextState2 = produce(this.state, (draft) => {
+				draft.response = response;
+				draft.loading = false;
+			});
+			this.setState(nextState2);
+			console.log('TCL: getCityWeaether -> response', response);
+		} catch (e) {}
+	};
+	showDataURL3 = (newURL) => {
 		console.log('TCL: showDataURL -> URL', newURL);
-		this.fetchDataURL(newURL);
+		this.fetchDataURL3(newURL);
 	};
 
 	onAddInputChange = (event) => {
@@ -65,49 +116,56 @@ export default (class Users extends React.PureComponent {
 		this.setState(nextState);
 	};
 
+	generatePDF = () => {
+		console.log('TCL: generatePDF');
+	};
+
+	addTable= () =>{
+		
+		const nextState = produce(this.state, (draft) => {
+			const value = {"name": draft.response.name, "temp": draft.response.main.temp, "pressure":draft.response.main.pressure,"humidity": draft.response.main.humidity};
+			draft.datos = draft.datos.concat(value);
+			console.log(draft.datos);
+		});
+		this.setState(nextState);
+	};
+
 	render() {
-		const { response, countries } = this.state;
-		const iconUrl = response && response.flag;
+		const { response, input_search,datos,header } = this.state;
 		return (
-			<div className={styles.main}>
+		<div ref={ref} className={styles.main}>
+			<div ref={ref} className={styles.data}>
 				<div className={styles.container_boards}>
 						<Input type="text" value={this.state.input_search} onChange={this.onAddInputChange} className={styles.inputURL}/>
-						<Button type={'go'} onClick={() => this.showDataURL(this.state.input_search)} />
+						<ul >
+							<li className={styles.city} onClick={() => this.showDataURL1(input_search)}>ByCityName</li>
+							<li className={styles.city} onClick={() => this.showWeaether(input_search)}>ByCityID</li>
+							<li className={styles.city} onClick={() => this.showDataURL3(input_search)}>ByCoordinates</li>
+						</ul>
+
 				</div>
 				<ul>
-					{countries.map((country, i) => {
-						return (
-							<li key={i} className={styles.country} onClick={() => this.showData(country)}>
-								{country}
-							</li>
-						);
-					})}
+						<li>Name: {response && response.name}</li>
+						<li>Temp: {response && response.main && response.main.temp}</li>
+						<li>Pressure: {response && response.main && response.main.pressure}</li>
+						<li>Humidity: {response && response.main && response.main.humidity}</li>
 				</ul>
-				<ul>
-					<li> País: {response && response.name}</li>
-					<li> Capital: {response && response.capital}</li>
-					<li> Población: {response && response.population}</li>
-					<li>
-						Idioma:
-						{response &&
-							response.languages &&
-							response.languages.map((item, i) => {
-								return response.languages.length > 1 && i !== response.languages.length - 1 ? ' ' + item.nativeName + ', ' : ' ' + item.nativeName;
-							})}
-					</li>
-					<li> Región: {response && response.region}</li>
-					<li>
-						Monedas:
-						{response &&
-							response.currencies &&
-							response.currencies.map((item, i) => {
-								return response.currencies.length > 1 && i !== response.currencies.length - 1 ? ' ' + item.name + ', ' : ' ' + item.name;
-							})}
-					</li>
-					<li>
-						Bandera:<br/> <img src={iconUrl} alt="" width="100px"/>
-					</li>
-				</ul>
+			</div>			
+
+				<div className={styles.container_button}>
+					
+							<button className={styles.button} onClick={this.addTable}>
+								NEW
+							</button>
+				</div>
+
+				<br/>
+
+				<Table data={this.state.datos} headers={header} />
+
+				<div className={styles.chart}>
+						<SimpleBarChart data={datos} x={'name'} y1={'temp'} y2={'pressute'} y1Axis={'left'} y2Axis={'right'} />
+					</div>
 			</div>
 		);
 	}
